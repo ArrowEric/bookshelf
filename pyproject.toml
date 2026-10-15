@@ -42,4 +42,8 @@ python_version = "3.11"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=bookshelf --cov-report=term-missing"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks integration tests (require external services)",
+]
+addopts = "-v --tb=short --cov=bookshelf --cov-report=term-missing"

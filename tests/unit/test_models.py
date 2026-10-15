@@ -1,0 +1,51 @@
+import pytest
+from bookshelf.models import BookCreate, ReviewCreate
+from pydantic import ValidationError
+
+
+def test_book_create_valid():
+    book = BookCreate(
+        title="The Pragmatic Programmer",
+        author="David Thomas",
+        isbn="9780135957059",
+        year=1999,
+    )
+    assert book.title == "The Pragmatic Programmer"
+    assert book.isbn == "9780135957059"
+    assert book.year == 1999
+
+
+def test_book_create_strips_isbn_hyphens():
+    book = BookCreate(
+        title="Clean Code",
+        author="Robert Martin",
+        isbn="978-0-13-235088-4",
+        year=2008,
+    )
+    assert book.isbn == "9780132350884"
+
+
+def test_book_create_invalid_isbn_raises():
+    with pytest.raises(ValidationError) as exc_info:
+        BookCreate(title="X", author="Y", isbn="123", year=2020)
+    assert "ISBN" in str(exc_info.value)
+
+
+def test_book_create_future_year_raises():
+    with pytest.raises(ValidationError) as exc_info:
+        BookCreate(
+            title="Future Book",
+            author="Test",
+            isbn="9780135957059",
+            year=2099,
+        )
+    assert "future" in str(exc_info.value).lower()
+
+
+def test_review_create_rating_out_of_range_raises():
+    with pytest.raises(ValidationError):
+        ReviewCreate(
+            rating=6,
+            text="Off the charts!",
+            reviewer="bob",
+        )
